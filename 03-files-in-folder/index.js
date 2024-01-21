@@ -6,7 +6,6 @@ fs.readdir(
   (err, files) => {
     if (err) console.log(err);
     else {
-      console.log('\nCurrent directory filenames:');
       files.forEach((file) => {
         if (file.isFile()) {
           fs.stat(
