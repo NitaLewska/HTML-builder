@@ -12,7 +12,10 @@ fs.readdir(
           fs.stat(
             path.join(__dirname, '/secret-folder', file.name),
             (err, stats) => {
-              let [fileName, fileExtension] = file.name.split('.');
+              let [fileName, fileExtension] = [
+                file.name.split('.').slice(0, -1).join('.'),
+                file.name.split('.')[file.name.split('.').length - 1],
+              ];
               console.log(
                 `${fileName} - ${fileExtension} - ${stats.size} bytes`,
               );
