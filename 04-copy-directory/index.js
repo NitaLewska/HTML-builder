@@ -1,21 +1,46 @@
 const fs = require('fs');
 const path = require('path');
-fs.readdir(path.join(__dirname, '/secret-folder'), (err, files) => {
+
+const sourceFolder = path.join(__dirname, 'files');
+const destinationFolder = path.join(__dirname, 'files-copy');
+
+fs.mkdir(destinationFolder, { recursive: true }, (err) => {
   if (err) console.log(err);
-  else {
-    files.forEach((file) => {
-      if (file.isFile()) {
-        fs.stat(
-          path.join(__dirname, '/secret-folder', file.name),
-          (err, stats) => {
-            let [fileName, fileExtension] = [
-              file.name.split('.').slice(0, -1).join('.'),
-              file.name.split('.')[file.name.split('.').length - 1],
-            ];
-            console.log(`${fileName} - ${fileExtension} - ${stats.size} bytes`);
-          },
-        );
-      }
-    });
-  }
 });
+
+const copyDir = (src, dest, callback) => {
+  const copy = (copySrc, copyDest) => {
+    fs.readdir(copySrc, (err, list) => {
+      if (err) {
+        callback(err);
+        return;
+      }
+      list.forEach((item) => {
+        const ss = path.resolve(copySrc, item);
+        fs.stat(ss, (err, stat) => {
+          if (err) {
+            callback(err);
+          } else {
+            const curSrc = path.resolve(copySrc, item);
+            const curDest = path.resolve(copyDest, item);
+            if (stat.isFile()) {
+              fs.createReadStream(curSrc).pipe(fs.createWriteStream(curDest));
+            } else if (stat.isDirectory()) {
+              fs.mkdir(curDest, { recursive: true });
+              copy(curSrc, curDest);
+            }
+          }
+        });
+      });
+    });
+  };
+
+  fs.access(dest, (err) => {
+    if (err) {
+      fs.mkdir(dest, { recursive: true });
+    }
+    copy(src, dest);
+  });
+};
+
+copyDir(sourceFolder, destinationFolder);
