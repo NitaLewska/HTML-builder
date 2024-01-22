@@ -13,7 +13,7 @@ fs.readdir(
     if (err) console.log(err);
     else {
       files.forEach((file) => {
-        if (file.name.endsWith('.css')) {
+        if (file.name.endsWith('.css') && file.isFile()) {
           fs.readFile(
             path.join(__dirname, '/styles', file.name),
             (err, data) => {
